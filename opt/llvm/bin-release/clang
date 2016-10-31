@@ -1,0 +1,22 @@
+#!/bin/sh -ue
+
+LLVM_SDK_ROOT=/opt/llvm
+
+. $LLVM_SDK_ROOT/common.sh
+
+CFLAGS="\
+-flto \
+-Ofast \
+-fno-fast-math \
+-fomit-frame-pointer \
+-glldb \
+-gline-tables-only \
+-fno-stack-protector"
+
+LDFLAGS="\
+-glldb \
+-gline-tables-only \
+-flto"
+
+run_exe
+

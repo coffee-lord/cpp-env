@@ -1,0 +1,33 @@
+#!/bin/sh -ue
+
+LLVM_SDK_ROOT=/opt/llvm
+
+. $LLVM_SDK_ROOT/common.sh
+
+CFLAGS="\
+-g \
+-fsanitize=integer,undefined \
+-fno-omit-frame-pointer \
+-O0 \
+-Wno-padded \
+-D_DEBUG \
+-gsplit-dwarf \
+-fno-limit-debug-info \
+-fcolor-diagnostics \
+-ferror-limit=1 \
+-Weverything \
+-Wno-c++98-compat \
+-Wno-c++98-c++11-compat-pedantic \
+-Wno-weak-vtables \
+-Wno-c++98-compat-pedantic \
+-Wno-disabled-macro-expansion \
+-Wno-exit-time-destructors"
+
+CXXFLAGS="$CFLAGS"
+
+LDFLAGS="\
+-g \
+-fsanitize=integer,undefined"
+
+run_exe
+
