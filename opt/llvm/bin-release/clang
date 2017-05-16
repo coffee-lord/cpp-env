@@ -5,8 +5,8 @@ LLVM_SDK_ROOT=/opt/llvm
 . $LLVM_SDK_ROOT/common.sh
 
 CFLAGS="\
--flto \
 -Ofast \
+-flto=thin \
 -fno-fast-math \
 -fomit-frame-pointer \
 -glldb \
@@ -15,8 +15,7 @@ CFLAGS="\
 
 LDFLAGS="\
 -glldb \
--gline-tables-only \
--flto"
+-gline-tables-only"
 
 run_exe
 

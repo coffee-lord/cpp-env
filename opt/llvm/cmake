@@ -1,0 +1,10 @@
+#!/bin/sh -ue
+
+LLVM_ROOT=/opt/llvm
+BOOST_ROOT=/opt/llvm-boost/stage
+
+if echo "$*" | grep -q -- '--build'; then
+	exec /usr/bin/cmake $*
+else
+	exec /usr/bin/cmake -DBOOST_ROOT=$BOOST_ROOT -DCMAKE_AR=$LLVM_ROOT/stage/bin/llvm-ar -DCMAKE_NM=$LLVM_ROOT/stage/bin/llvm-nm -DCMAKE_RANLIB=$LLVM_ROOT/stage/bin/llvm-ranlib $*
+fi

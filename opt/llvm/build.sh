@@ -1,6 +1,6 @@
 #!/bin/sh -xue
 
-UPDATE_GIT=1
+UPDATE_GIT=0
 IS_REBUILD=1
 
 LLVM_ROOT=$(pwd)
@@ -8,11 +8,16 @@ export PATH="$LLVM_ROOT/stage/bin:/usr/bin:/bin"
 
 BUILD_DIR="/tmp/llvm"
 
-export CC=clang
-export CXX=clang++
-
-# export CC=gcc
-# export CXX=g++
+if [ "$IS_REBUILD" = 1 ]; then
+	export CC=$LLVM_ROOT/stage/bin/clang
+	export CXX=$LLVM_ROOT/stage/bin/clang++
+	export AR=$LLVM_ROOT/stage/bin/llvm-ar
+	export NM=$LLVM_ROOT/stage/bin/llvm-nm
+	export RANLIB=$LLVM_ROOT/stage/bin/llvm-ranlib
+else
+	export CC=clang
+	export CXX=clang++
+fi
 
 if ! [ "$LLVM_ROOT" = "/opt/llvm" ]; then
 	echo 'Refusing to run outside of /opt/llvm'
@@ -55,13 +60,13 @@ CFLAGS="\
 -pipe \
 -fomit-frame-pointer \
 -fno-stack-protector \
--ffast-math \
 -march=native -mtune=native \
 -fdata-sections -ffunction-sections \
 -fPIC \
 -Ofast"
-LDFLAGS="
+LDFLAGS="\
 -pipe \
+-lm \
 -fPIC \
 -Wl,--gc-sections,--as-needed,-z,norelro \
 -L$LLVM_ROOT/stage/lib \
@@ -72,18 +77,27 @@ LDFLAGS="
 if [ "$IS_REBUILD" = 1 ]; then
 	LDFLAGS="\
 -lunwind \
--lm \
--Wl,--threads \
+-lpanel \
+-lncurses \
+-ledit \
 $LDFLAGS"
 fi
 
 cat >/tmp/file.txt <<EOF
+
+# Enable Exception handling
+
+LLVM_ENABLE_EH=ON
+LLVM_ENABLE_RTTI=ON
 
 # Default C++ stdlib to use ("libstdc++" or "libc++", empty for platform default
 CLANG_DEFAULT_CXX_STDLIB=libc++
 
 # Default runtime library to use ("libgcc" or "compiler-rt", empty for platform default)
 CLANG_DEFAULT_RTLIB=compiler-rt
+
+# Default linker to use (linker name or absolute path, empty for platform default)
+CLANG_DEFAULT_LINKER="$LLVM_ROOT/stage/bin/ld.lld"
 
 # Generate build targets for the Clang docs.
 CLANG_INCLUDE_DOCS=OFF
@@ -156,11 +170,14 @@ LLVM_OPTIMIZED_TABLEGEN=ON
 
 LLVM_ENABLE_PIC=ON
 
+# Build OCaml bindings documentation.
+LLVM_ENABLE_OCAMLDOC=OFF
 EOF
 
 CMAKE_ARGS=$(cat /tmp/file.txt | sed '/^#/d' | sed '/^$/d' | sed 's/.*/-D&/' | tr '\n' ' ')
 
-cat >/tmp/file.txt <<EOF
+if [ "$IS_REBUILD" = 1 ]; then
+	cat >/tmp/file.txt <<EOF
 
 # Use libc++ if available.
 LLVM_ENABLE_LIBCXX=ON
@@ -177,18 +194,22 @@ LIBCXXABI_USE_COMPILER_RT=ON
 # Build and use the LLVM unwinder.
 LIBCXXABI_USE_LLVM_UNWINDER=ON
 
-# Build LLVM with LTO. May be specified as Thin or Full to use a particular kind of LTO
-# LLVM_ENABLE_LTO=Full
+# Use compiler-rt instead of libgcc
+LIBUNWIND_USE_COMPILER_RT=ON
 
+# Build LLVM with LTO. May be specified as Thin or Full to use a particular kind of LTO
+LLVM_ENABLE_LTO=Thin
+
+CMAKE_AR=$AR
+CMAKE_RANLIB=$RANLIB
+CMAKE_NM=$NM
 EOF
 
-CMAKE_ARGS_STAGE_2=$(cat /tmp/file.txt | sed '/^#/d' | sed '/^$/d' | sed 's/.*/-D&/' | tr '\n' ' ')
-
-rm /tmp/file.txt
-
-if [ "$IS_REBUILD" = 1 ]; then
+	CMAKE_ARGS_STAGE_2=$(cat /tmp/file.txt | sed '/^#/d' | sed '/^$/d' | sed 's/.*/-D&/' | tr '\n' ' ')
 	CMAKE_ARGS="$CMAKE_ARGS $CMAKE_ARGS_STAGE_2"
 fi
+
+rm /tmp/file.txt
 
 eval "cmake -G Ninja $CMAKE_ARGS $LLVM_ROOT/src"
 
