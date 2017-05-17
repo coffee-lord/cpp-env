@@ -86,7 +86,6 @@ run_exe() {
 	strip_tail '-O'
 	strip_tail '-stdlib'
 	strip_tail '-rtlib'
-	ARGS=$(echo -n "$ARGS" | sed "s/-std=gnu++14/-std=c++1z/g")
 
 	strip_whitespace
 	add_flags

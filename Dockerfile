@@ -15,5 +15,7 @@ ADD ci-update-part-4.sh /root
 RUN /root/ci-update-part-4.sh && rm /root/ci-update-part-4.sh
 ADD ci-update-part-5.sh /root
 RUN /root/ci-update-part-5.sh && rm /root/ci-update-part-5.sh
+ADD ci-update-part-6.sh /root
+RUN /root/ci-update-part-6.sh && rm /root/ci-update-part-6.sh
 
-ENV PATH=/opt/llvm/bin-release:/opt/llvm/stage/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/bin:/bin CC=clang CXX=clang++
+ENV PATH=/opt/llvm/bin-release:/opt/llvm/stage/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/bin:/bin CC=clang CXX=clang++ AR=/opt/llvm/stage/bin/llvm-ar NM=/opt/llvm/stage/bin/llvm-nm RANLIB=/opt/llvm/stage/bin/llvm-ranlib

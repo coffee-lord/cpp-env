@@ -17,7 +17,10 @@ if [ "$IS_REBUILD" = 1 ]; then
 else
 	export CC=clang
 	export CXX=clang++
+	# export CC=gcc
+	# export CXX=g++
 fi
+
 
 if ! [ "$LLVM_ROOT" = "/opt/llvm" ]; then
 	echo 'Refusing to run outside of /opt/llvm'

@@ -1,11 +1,15 @@
 #!/bin/sh -xue
 
-LLVM_SDK_ROOT=/opt/llvm
+LLVM_ROOT=/opt/llvm
 BOOST_ROOT=/opt/llvm-boost/stage
 
-export PATH="$LLVM_SDK_ROOT/bin-release:$LLVM_SDK_ROOT/stage/bin:/usr/bin:/bin"
-export CC="clang"
-export CXX="clang++"
+export PATH="$LLVM_ROOT/bin-release:$LLVM_ROOT/stage/bin:/usr/bin:/bin"
+
+export CC=$LLVM_ROOT/bin-release/clang
+export CXX=$LLVM_ROOT/bin-release/clang++
+export AR=$LLVM_ROOT/stage/bin/llvm-ar
+export NM=$LLVM_ROOT/stage/bin/llvm-nm
+export RANLIB=$LLVM_ROOT/stage/bin/llvm-ranlib
 
 build_boost() {
 ./b2 \
