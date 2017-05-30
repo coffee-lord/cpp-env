@@ -10,13 +10,10 @@ COMMON_CFLAGS="\
 -march=native -mtune=native"
 
 COMMON_LDFLAGS="\
--pipe \
--fPIC \
 -L$LLVM_SDK_ROOT/stage/lib \
 -Wl,-rpath=$LLVM_SDK_ROOT/stage/lib \
 -Wl,-rpath='\$ORIGIN' \
 -rtlib=compiler-rt \
--stdlib=libc++ \
 -ldl \
 -lc++ \
 -lc++abi \
@@ -39,23 +36,11 @@ check_args() {
 	echo "$ARGS" | grep -qE -- "(^| +)$1(\$| +)"
 }
 
-add_cc() {
-	ARGS="$ARGS $COMMON_CFLAGS $CFLAGS"
-}
-
 add_flags() {
-	if check_args '-c'; then
-		add_cc
-		return 0
-	fi
-	if check_args '-E'; then
-		add_cc
-		return 0
-	fi
-	if check_args '-x c\+\+-header'; then
-		add_cc
-		return 0
-	fi
+	ARGS="$ARGS $COMMON_CFLAGS $CFLAGS"
+	check_args '-c' && return 0
+	check_args '-E' && return 0
+	check_args '-x c\+\+-header' && return 0
 	ARGS="$ARGS $COMMON_LDFLAGS $LDFLAGS"
 }
 
@@ -90,6 +75,6 @@ run_exe() {
 	strip_whitespace
 	add_flags
 
-	echo "${0##*/}" $ARGS >> /tmp/clang_log.txt
+	echo "${0##*/} $ARGS" >> /tmp/clang_log.txt
 	exec $EXE $ARGS
 }

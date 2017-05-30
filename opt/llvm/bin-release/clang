@@ -13,9 +13,7 @@ CFLAGS="\
 -gline-tables-only \
 -fno-stack-protector"
 
-LDFLAGS="\
--glldb \
--gline-tables-only"
+LDFLAGS=""
 
 run_exe
 

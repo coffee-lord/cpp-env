@@ -18,6 +18,7 @@ ninja-build \
 python3-pip \
 libncurses5-dev \
 libxml2-dev \
+subversion \
 clang \
 python3-setuptools \
 python3-wheel

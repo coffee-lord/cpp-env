@@ -30,28 +30,21 @@ fi
 update_git() {
 	TARGET_DIR="$LLVM_ROOT/$1"
 	mkdir -p $TARGET_DIR
-	TMP_DIR=$(mktemp -d)	
-	cd $TMP_DIR
-	curl -k -L --compressed $2 > src.zip
-	unzip $TMP_DIR/src.zip
-	SRC_DIR=$(find . -type d ! -name '.' | head -n 1)
-	mv -T $SRC_DIR $TARGET_DIR
-	rm -rf $TMP_DIR
-	cd $LLVM_ROOT
+	svn co $2 $TARGET_DIR
 }
 
 if [ "$UPDATE_GIT" = "1" ]; then
-	update_git src 'https://github.com/llvm-mirror/llvm/archive/master.zip'
-	update_git src/tools/polly 'https://github.com/llvm-mirror/polly/archive/master.zip'
-	update_git src/tools/clang 'https://github.com/llvm-mirror/clang/archive/master.zip'
-	update_git src/tools/clang/tools/extra 'https://github.com/llvm-mirror/clang-tools-extra/archive/master.zip'
-	update_git src/tools/lldb 'https://github.com/llvm-mirror/lldb/archive/master.zip'
-	update_git src/tools/lld 'https://github.com/llvm-mirror/lld/archive/master.zip'
-	update_git src/projects/libcxx 'https://github.com/llvm-mirror/libcxx/archive/master.zip'
-	update_git src/projects/libcxxabi 'https://github.com/llvm-mirror/libcxxabi/archive/master.zip'
-	update_git src/projects/compiler-rt 'https://github.com/llvm-mirror/compiler-rt/archive/master.zip'
-	update_git src/projects/openmp 'https://github.com/llvm-mirror/openmp/archive/master.zip'
-	update_git src/projects/libunwind 'https://github.com/llvm-mirror/libunwind/archive/master.zip'
+	update_git src 'http://llvm.org/svn/llvm-project/llvm/trunk'
+	update_git src/tools/polly 'http://llvm.org/svn/llvm-project/polly/trunk'
+	update_git src/tools/clang 'http://llvm.org/svn/llvm-project/cfe/trunk'
+	update_git src/tools/clang/tools/extra 'http://llvm.org/svn/llvm-project/clang-tools-extra/trunk'
+	update_git src/tools/lldb 'http://llvm.org/svn/llvm-project/lldb/trunk'
+	update_git src/tools/lld 'http://llvm.org/svn/llvm-project/lld/trunk'
+	update_git src/projects/libcxx 'http://llvm.org/svn/llvm-project/libcxx/trunk'
+	update_git src/projects/libcxxabi 'http://llvm.org/svn/llvm-project/libcxxabi/trunk'
+	update_git src/projects/compiler-rt 'http://llvm.org/svn/llvm-project/compiler-rt/trunk'
+	update_git src/projects/openmp 'http://llvm.org/svn/llvm-project/openmp/trunk'
+	update_git src/projects/libunwind 'http://llvm.org/svn/llvm-project/libunwind/trunk'
 fi
 
 rm -rf "$BUILD_DIR"
@@ -69,22 +62,12 @@ CFLAGS="\
 -Ofast"
 LDFLAGS="\
 -pipe \
--lm \
 -fPIC \
 -Wl,--gc-sections,--as-needed,-z,norelro \
 -L$LLVM_ROOT/stage/lib \
 -Wl,-rpath=$LLVM_ROOT/stage/lib \
 -Wl,-rpath='\\\$ORIGIN' \
 "
-
-if [ "$IS_REBUILD" = 1 ]; then
-	LDFLAGS="\
--lunwind \
--lpanel \
--lncurses \
--ledit \
-$LDFLAGS"
-fi
 
 cat >/tmp/file.txt <<EOF
 
@@ -175,6 +158,13 @@ LLVM_ENABLE_PIC=ON
 
 # Build OCaml bindings documentation.
 LLVM_ENABLE_OCAMLDOC=OFF
+
+LIBOMP_LIBFLAGS=-lm
+
+LLVM_LINK_LLVM_DYLIB=ON
+
+# Build and use the LLVM unwinder.
+LIBCXXABI_USE_LLVM_UNWINDER=ON
 EOF
 
 CMAKE_ARGS=$(cat /tmp/file.txt | sed '/^#/d' | sed '/^$/d' | sed 's/.*/-D&/' | tr '\n' ' ')
@@ -193,9 +183,6 @@ LIBCXX_USE_COMPILER_RT=ON
 
 # Use compiler-rt instead of libgcc
 LIBCXXABI_USE_COMPILER_RT=ON
-
-# Build and use the LLVM unwinder.
-LIBCXXABI_USE_LLVM_UNWINDER=ON
 
 # Use compiler-rt instead of libgcc
 LIBUNWIND_USE_COMPILER_RT=ON

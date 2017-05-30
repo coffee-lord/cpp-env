@@ -17,6 +17,8 @@ CFLAGS="\
 -ferror-limit=1 \
 -Weverything \
 -Wno-c++98-compat \
+-Wno-date-time \
+-Wno-pch-date-time \
 -Wno-c++98-c++11-compat-pedantic \
 -Wno-weak-vtables \
 -Wno-missing-braces \
@@ -25,11 +27,7 @@ CFLAGS="\
 -Wno-disabled-macro-expansion \
 -Wno-exit-time-destructors"
 
-CXXFLAGS="$CFLAGS"
-
-LDFLAGS="\
--g \
--fsanitize=integer,undefined"
+LDFLAGS=""
 
 run_exe
 
