@@ -10,6 +10,9 @@ mkdir -p ~/.conan
 CLANG_VERSION=$($LLVM_SDK_ROOT/stage/bin/clang -v 2>&1 | sed -n 's/.*clang version \(.\..\).*/\1/p')
 
 cat > ~/.conan/conan.conf <<EOF
+[storage]
+path: ~/.conan/data
+
 [settings_defaults]
 arch=x86_64
 build_type=Release
