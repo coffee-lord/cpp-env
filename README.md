@@ -1,6 +1,10 @@
-# Ubuntu Build Environment for C++
+# C++ Environment
 
 A docker image for building C++ packages.
+
+```sh
+docker pull registry.gitlab.com/signal9/cpp-env
+```
 
 ## Features
 
@@ -11,15 +15,3 @@ A docker image for building C++ packages.
 * Clang
 * LLD linker
 * Boost
-
-## Variables
-
-```sh
-LLVM_SDK_ROOT=/opt/llvm
-BOOST_ROOT=/opt/llvm-boost/stage
-
-PATH=$LLVM_SDK_ROOT/bin-release:$LLVM_SDK_ROOT/stage/bin:/usr/bin:/bin
-
-CXX=clang++
-CC=clang
-```
