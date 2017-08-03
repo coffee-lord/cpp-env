@@ -1,6 +1,6 @@
 # C++ Environment
 
-A docker image for building C++ packages.
+Clang-based container for building C++ applications.
 
 ```sh
 docker pull registry.gitlab.com/signal9/cpp-env
@@ -8,10 +8,15 @@ docker pull registry.gitlab.com/signal9/cpp-env
 
 ## Features
 
-* Full LLVM pipeline
+* Boost
+* CMake
+* Clang
+* Conan
+* LLD linker
+* LLVM
+* Ninja
+* OpenMP
+* Polly
+* compiler-rt
 * libc++
 * libunwind
-* compiler-rt
-* Clang
-* LLD linker
-* Boost
