@@ -1,35 +1,24 @@
-#!/bin/sh -ue
+#!/bin/bash -ue
 
 echo 'EXECUTING PART 5'
 
 cd ~
 python3 -m pip install --user --upgrade conan pip
-
-mkdir -p ~/.conan
-
-CLANG_VERSION=$($LLVM_SDK_ROOT/stage/bin/clang -v 2>&1 | sed -n 's/.*clang version \(.\..\).*/\1/p')
-
-cat > ~/.conan/conan.conf <<EOF
-[storage]
-path: ~/.conan/data
-
-[settings_defaults]
-arch=x86_64
-build_type=Release
-compiler=clang
-compiler.libcxx=libc++
-compiler.version=$CLANG_VERSION
-os=Linux
-EOF
-
-cat > ~/.conan/settings.yml <<EOF
-os: [Linux]
-arch: [x86_64]
-compiler:
-    clang:
-        version: ["$CLANG_VERSION"]
-        libcxx: [libc++]
-build_type: [Release]
-EOF
-
 apt-get -y clean
+
+IFS=$'\n'
+for f in $(find /usr \( -name 'crtend*' -o -name 'crtbegin*' \)); do
+	mv "$f" "$f~"
+done
+
+apt-get -y purge --auto-remove build-essential binutils libxml2-dev libedit-dev
+# Move to part 1
+apt-get install -y --no-install-recommends libedit2
+
+IFS=$'\n'
+for f in $(find /usr \( -name 'crtend*' -o -name 'crtbegin*' \)); do
+	mv "$f" "${f%\~}"
+done
+
+rm -rf /var/lib/apt
+rm -rf /var/cache/apt
