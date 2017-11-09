@@ -1,6 +1,6 @@
 #!/bin/sh -xue
 
-UPDATE_GIT=0
+UPDATE_GIT=1
 IS_REBUILD=1
 
 LLVM_ROOT=$(pwd)
@@ -15,10 +15,10 @@ if [ "$IS_REBUILD" = 1 ]; then
 	export NM=$LLVM_ROOT/stage/bin/llvm-nm
 	export RANLIB=$LLVM_ROOT/stage/bin/llvm-ranlib
 else
-	export CC=clang
-	export CXX=clang++
-	# export CC=gcc
-	# export CXX=g++
+	# export CC=clang
+	# export CXX=clang++
+	export CC=gcc
+	export CXX=g++
 fi
 
 
@@ -68,6 +68,10 @@ LDFLAGS="\
 -Wl,-rpath=$LLVM_ROOT/stage/lib \
 -Wl,-rpath='\\\$ORIGIN' \
 "
+
+if [ "$IS_REBUILD" = 1 ]; then
+	CFLAGS="$CFLAGS -gline-tables-only"
+fi
 
 cat >/tmp/file.txt <<EOF
 
@@ -188,7 +192,7 @@ LIBCXXABI_USE_COMPILER_RT=ON
 LIBUNWIND_USE_COMPILER_RT=ON
 
 # Build LLVM with LTO. May be specified as Thin or Full to use a particular kind of LTO
-LLVM_ENABLE_LTO=Thin
+# LLVM_ENABLE_LTO=Thin
 
 CMAKE_AR=$AR
 CMAKE_RANLIB=$RANLIB
