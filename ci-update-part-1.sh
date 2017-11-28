@@ -21,4 +21,6 @@ libxml2-dev \
 subversion \
 clang \
 python3-setuptools \
-python3-wheel
+python3-wheel \
+libedit2 \
+linux-headers-amd64

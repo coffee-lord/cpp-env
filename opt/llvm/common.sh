@@ -6,8 +6,7 @@ COMMON_CFLAGS="\
 -Qunused-arguments \
 -fPIC \
 -fdata-sections -ffunction-sections \
--stdlib=libc++ \
--march=native -mtune=native"
+-stdlib=libc++"
 
 COMMON_LDFLAGS="\
 -L$LLVM_SDK_ROOT/stage/lib \

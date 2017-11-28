@@ -4,16 +4,23 @@ LLVM_SDK_ROOT=/opt/llvm
 
 . $LLVM_SDK_ROOT/common.sh
 
-CFLAGS="\
--Ofast \
--flto=thin \
--fno-fast-math \
--fomit-frame-pointer \
--gline-tables-only \
--mllvm -polly -mllvm -polly-parallel -lgomp -mllvm -polly-vectorizer=stripmine \
--fno-stack-protector"
+if [ -z ${OPTIM_SIZE+x} ]; then 
 
+CFLAGS="-Ofast"
 LDFLAGS=""
 
-run_exe
+else
 
+CFLAGS="-Oz"
+LDFLAGS="-Wl,-s"
+
+fi
+
+CFLAGS="$CFLAGS \
+-fno-fast-math \
+-fomit-frame-pointer \
+-fno-stack-protector"
+
+LDFLAGS="$LDFLAGS"
+
+run_exe

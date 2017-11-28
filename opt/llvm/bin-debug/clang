@@ -6,6 +6,7 @@ LLVM_SDK_ROOT=/opt/llvm
 
 CFLAGS="\
 -g \
+-gmodules \
 -fsanitize=address,integer,undefined \
 -fno-omit-frame-pointer \
 -O0 \

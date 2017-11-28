@@ -56,29 +56,29 @@ CFLAGS="\
 -pipe \
 -fomit-frame-pointer \
 -fno-stack-protector \
--march=native -mtune=native \
 -fdata-sections -ffunction-sections \
--fPIC \
--Ofast"
+-fPIC"
 LDFLAGS="\
 -pipe \
 -fPIC \
--Wl,--gc-sections,--as-needed,-z,norelro \
+-Wl,-s,--gc-sections,--as-needed,-z,norelro \
 -L$LLVM_ROOT/stage/lib \
 -Wl,-rpath=$LLVM_ROOT/stage/lib \
 -Wl,-rpath='\\\$ORIGIN' \
 "
 
 if [ "$IS_REBUILD" = 1 ]; then
-	CFLAGS="$CFLAGS -gline-tables-only"
+	CFLAGS="$CFLAGS -Oz"
+else
+	CFLAGS="$CFLAGS -Ofast"
 fi
 
 cat >/tmp/file.txt <<EOF
 
 # Enable Exception handling
 
-LLVM_ENABLE_EH=ON
-LLVM_ENABLE_RTTI=ON
+LLVM_ENABLE_EH=OFF
+LLVM_ENABLE_RTTI=OFF
 
 # Default C++ stdlib to use ("libstdc++" or "libc++", empty for platform default
 CLANG_DEFAULT_CXX_STDLIB=libc++
@@ -99,7 +99,7 @@ CLANG_INCLUDE_TESTS=OFF
 CLANG_TOOLS_EXTRA_INCLUDE_DOCS=OFF
 
 # Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.
-CMAKE_BUILD_TYPE=Release
+CMAKE_BUILD_TYPE=MinSizeRel
 
 # Flags used by the compiler during all build types.
 CMAKE_CXX_FLAGS="$CFLAGS"

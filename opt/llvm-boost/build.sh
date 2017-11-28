@@ -10,6 +10,7 @@ export CXX=$LLVM_ROOT/bin-release/clang++
 export AR=$LLVM_ROOT/stage/bin/llvm-ar
 export NM=$LLVM_ROOT/stage/bin/llvm-nm
 export RANLIB=$LLVM_ROOT/stage/bin/llvm-ranlib
+export OPTIM_SIZE=1
 
 build_boost() {
 ./b2 \
