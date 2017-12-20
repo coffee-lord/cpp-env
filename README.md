@@ -20,3 +20,4 @@ docker pull registry.gitlab.com/signal9/cpp-env
 * compiler-rt
 * libc++
 * libunwind
+* Meson

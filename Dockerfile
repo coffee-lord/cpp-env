@@ -20,4 +20,4 @@ RUN /root/ci-update-part-6.sh && rm /root/ci-update-part-6.sh
 
 ADD bootstrap.sh /
 
-ENV PATH=/root/.local/bin:/opt/llvm/bin-release:/opt/llvm/stage/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/bin:/bin CC=/opt/llvm/bin-release/clang CXX=/opt/llvm/bin-release/clang++ AR=/opt/llvm/stage/bin/llvm-ar NM=/opt/llvm/stage/bin/llvm-nm RANLIB=/opt/llvm/stage/bin/llvm-ranlib CONAN_ENV_COMPILER_LIBCXX=libc++
+ENV PATH=/root/.local/bin:/opt/llvm/bin-release:/opt/llvm/stage/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/bin:/bin CC=/opt/llvm/bin-release/clang CXX=/opt/llvm/bin-release/clang++ AR=/opt/llvm/stage/bin/llvm-ar NM=/opt/llvm/stage/bin/llvm-nm RANLIB=/opt/llvm/stage/bin/llvm-ranlib CONAN_ENV_COMPILER_LIBCXX=libc++ LD_LIBRARY_PATH=/opt/llvm-boost/stage/lib

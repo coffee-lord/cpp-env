@@ -8,7 +8,6 @@ apt-get dist-upgrade -y
 apt-get install -y --no-install-recommends \
 cmake \
 build-essential \
-git \
 curl \
 unzip \
 libpthread-stubs0-dev \

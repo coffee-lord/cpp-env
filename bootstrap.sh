@@ -1,6 +1,7 @@
-#!/bin/bash -ue
+apt-get update
+apt-get install -y --no-install-recommends pkg-config git
 
-python3 -m pip install --user --upgrade conan pip
+python3 -m pip install --user --upgrade conan pip meson
 
 CLANG_VERSION=$($LLVM_SDK_ROOT/stage/bin/clang -v 2>&1 | sed -n 's/.*clang version \(.\..\).*/\1/p')
 
@@ -18,3 +19,8 @@ compiler:
 
 build_type: [Release]
 EOF
+
+patch_pcs() {
+	sed -i -e 's/\([^a-zA-Z]-\)I/\1isystem/g' -e 's/-L${libdir}/& -Wl,--rpath=${libdir}/g' **.pc
+	export PKG_CONFIG_PATH=$(pwd)
+}
