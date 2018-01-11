@@ -9,6 +9,10 @@ export CONAN_USER_HOME=$(pwd)
 conan remote add signal9 https://api.bintray.com/conan/signal9/conan > /dev/null 2>&1 || true
 
 cat > $CONAN_USER_HOME/.conan/settings.yml <<EOF
+os_build: [Linux]
+arch_build: [x86_64]
+os_target: [Linux]
+arch_target: [x86_64]
 os:
     Linux:
 arch: [x86_64]
@@ -16,7 +20,6 @@ compiler:
     clang:
         version: ["$CLANG_VERSION"]
         libcxx: [libc++]
-
 build_type: [Release]
 EOF
 
