@@ -75,5 +75,5 @@ run_exe() {
 	add_flags
 
 	echo "${0##*/} $ARGS" >> /tmp/clang_log.txt
-	exec $EXE $ARGS
+	eval exec $EXE $ARGS
 }

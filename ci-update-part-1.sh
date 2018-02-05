@@ -3,9 +3,10 @@
 echo 'EXECUTING PART 1'
 
 apt-get update
-apt-get dist-upgrade -y
 
-apt-get install -y --no-install-recommends \
+# apt-get dist-upgrade -y -m --no-install-recommends
+
+apt-get install -y -m --no-install-recommends \
 cmake \
 build-essential \
 curl \
