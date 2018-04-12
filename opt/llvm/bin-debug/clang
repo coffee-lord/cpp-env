@@ -4,14 +4,16 @@ LLVM_SDK_ROOT=/opt/llvm
 
 . $LLVM_SDK_ROOT/common.sh
 
+# -fsanitize=address,integer,undefined \
+
 CFLAGS="\
--g \
+-gfull \
+-glldb \
 -gmodules \
 -fno-omit-frame-pointer \
 -O0 \
 -Wno-padded \
 -D_DEBUG \
--gsplit-dwarf \
 -fno-limit-debug-info \
 -fcolor-diagnostics \
 -ferror-limit=1 \

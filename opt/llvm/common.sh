@@ -49,13 +49,14 @@ strip_whitespace() {
 }
 
 run_exe() {
-	strip_any '-fPIC'
-	# strip_any '-fPIE'
+	# strip_any '-fPIC'
+	strip_any '-fPIE'
 	strip_any '-Wall'
 	# strip_any '-fdata-sections'
 	# strip_any '-ffunction-sections'
 	# strip '-Wl,--gc-sections'
 	strip '-Wl,--enable-new-dtags'
+	strip '-Wl,--as-needed'
 	# strip '-fvisibility=hidden'
 	# strip_any '-fvisibility=hidden'
 	# strip '-fvisibility hidden'
@@ -63,16 +64,29 @@ run_exe() {
 	strip '-ccc-gcc-name g++'
 	strip '-fstack-protector'
 	strip '-fno-omit-frame-pointer'
-	strip_tail '-flto'
+	#strip_tail '-flto'
 	strip_tail '-g'
 	strip_tail '-march'
 	strip_tail '-mtune'
 	strip_tail '-O'
+	strip_tail '-Wl,-O'
 	strip_tail '-stdlib'
 	strip_tail '-rtlib'
 
+	if ! echo "$0" | grep -q -- "-std="; then
+		if echo "$0" | grep -q -- "++"; then
+			ARGS="$ARGS -Wno-narrowing"
+		fi
+	fi
+
 	strip_whitespace
 	add_flags
+
+	ARGS=$(echo -n "$ARGS" | sed "s/-flto /-flto=thin /g")
+	ARGS=$(echo -n "$ARGS" | sed "s/-std=c++17 /-std=c++2a /g")
+	ARGS=$(echo -n "$ARGS" | sed "s/-std=c++14 /-std=c++2a /g")
+	ARGS=$(echo -n "$ARGS" | sed "s/-fprofile-generate /-fprofile-generate=\/tmp\/clang_pgo /g")
+	ARGS=$(echo -n "$ARGS" | sed "s/-fprofile-use /-fprofile-use=\/tmp\/clang_pgo /g")
 
 	echo "${0##*/} $ARGS" >> /tmp/clang_log.txt
 	eval exec $EXE $ARGS

@@ -8,7 +8,6 @@ docker pull registry.gitlab.com/signal9/cpp-env
 
 ## Features
 
-* Boost
 * CMake
 * Clang
 * Conan
