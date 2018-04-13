@@ -8,6 +8,8 @@ CLANG_VERSION=$($LLVM_SDK_ROOT/stage/bin/clang -v 2>&1 | sed -n 's/.*clang versi
 export CONAN_USER_HOME=$(pwd)
 mkdir -p $CONAN_USER_HOME/.conan
 
+conan remote list > /dev/null
+
 cat > $CONAN_USER_HOME/.conan/settings.yml <<EOF
 # Only for cross building, 'os_build/arch_build' is the system that runs Conan
 os_build: [Windows, WindowsStore, Linux, Macos, FreeBSD, SunOS]
@@ -70,6 +72,6 @@ cppstd: [None, 98, gnu98, 11, gnu11, 14, gnu14, 17, gnu17]
 EOF
 
 patch_pcs() {
-	sed -i -e 's/\([^a-zA-Z]-\)I/\1isystem/g' -e 's/-L${libdir}/& -Wl,--rpath=${libdir}/g' **.pc
+	sed -i -e 's/\([^a-zA-Z]-\)I/\1isystem/g' -e 's/-L${libdir}/& -Wl,--rpath=${libdir}/g' -e 's@\${prefix}//@/@g' **.pc
 	export PKG_CONFIG_PATH=$(pwd)
 }
