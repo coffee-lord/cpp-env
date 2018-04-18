@@ -1,5 +1,5 @@
 apt-get update
-apt-get install -y --no-install-recommends pkg-config git
+apt-get install -y --no-install-recommends pkg-config git binutils
 
 python3 -m pip install --user --upgrade conan pip meson
 

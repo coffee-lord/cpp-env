@@ -3,7 +3,6 @@
 echo 'EXECUTING PART 5'
 
 cd ~
-python3 -m pip install --user --upgrade conan pip
 apt-get -y clean
 
 IFS=$'\n'
