@@ -73,6 +73,8 @@ run_exe() {
 	strip_tail '-stdlib'
 	strip_tail '-rtlib'
 
+	ARGS=$(echo -n "$ARGS" | sed 's/ "[^" ]*$ORIGIN[^" ]*" / /g')
+
 	if ! echo "$0" | grep -q -- "-std="; then
 		if echo "$0" | grep -q -- "++"; then
 			ARGS="$ARGS -Wno-narrowing"
