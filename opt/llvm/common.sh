@@ -1,5 +1,8 @@
 EXE=$LLVM_SDK_ROOT/stage/bin/${0##*/}
-ARGS="$*"
+ARGS=""
+for ARG in "$@"; do
+	ARGS="$ARGS \"$ARG\""
+done
 
 COMMON_CFLAGS="\
 -pipe \
@@ -20,7 +23,7 @@ COMMON_LDFLAGS="\
 -Wl,--threads,--gc-sections,--as-needed,-z,norelro"
 
 strip() {
-	ARGS=$(echo -n "$ARGS" | sed -r "s/(^| +)$*(\$| +)/ /g")
+	ARGS=$(echo -n "$ARGS" | sed -r "s/(^|\")$*(\$|\")/ /g")
 }
 
 strip_any() {
@@ -28,11 +31,11 @@ strip_any() {
 }
 
 strip_tail() {
-	ARGS=$(echo -n "$ARGS" | sed -r "s/(^| +)$*[^ ]*/ /g")
+	ARGS=$(echo -n "$ARGS" | sed -r "s/(^|\")$*[^\"]*/\"/g")
 }
 
 check_args() {
-	echo "$ARGS" | grep -qE -- "(^| +)$1(\$| +)"
+	echo "$ARGS" | grep -qE -- "(^|\")$1(\$|\")"
 }
 
 add_flags() {
@@ -55,6 +58,7 @@ run_exe() {
 	# strip_any '-fdata-sections'
 	# strip_any '-ffunction-sections'
 	# strip '-Wl,--gc-sections'
+	# strip '-Wl,--no-undefined'
 	strip '-Wl,--enable-new-dtags'
 	strip '-Wl,--as-needed'
 	# strip '-fvisibility=hidden'
@@ -64,7 +68,7 @@ run_exe() {
 	strip '-ccc-gcc-name g++'
 	strip '-fstack-protector'
 	strip '-fno-omit-frame-pointer'
-	#strip_tail '-flto'
+	strip_tail '-flto'
 	strip_tail '-g'
 	strip_tail '-march'
 	strip_tail '-mtune'
@@ -75,20 +79,12 @@ run_exe() {
 
 	ARGS=$(echo -n "$ARGS" | sed 's/ "[^" ]*$ORIGIN[^" ]*" / /g')
 
-	if ! echo "$0" | grep -q -- "-std="; then
-		if echo "$0" | grep -q -- "++"; then
-			ARGS="$ARGS -Wno-narrowing"
-		fi
-	fi
-
 	strip_whitespace
 	add_flags
 
-	ARGS=$(echo -n "$ARGS" | sed "s/-flto /-flto=thin /g")
-	ARGS=$(echo -n "$ARGS" | sed "s/-std=c++17 /-std=c++2a /g")
-	ARGS=$(echo -n "$ARGS" | sed "s/-std=c++14 /-std=c++2a /g")
-	ARGS=$(echo -n "$ARGS" | sed "s/-fprofile-generate /-fprofile-generate=\/tmp\/clang_pgo /g")
-	ARGS=$(echo -n "$ARGS" | sed "s/-fprofile-use /-fprofile-use=\/tmp\/clang_pgo /g")
+	ARGS=$(echo -n "$ARGS" | sed 's/"-fmodules"/"--ccache-skip" &/g')
+	ARGS=$(echo -n "$ARGS" | sed 's/" *" //g')
+	# ARGS="$ARGS -Wno-narrowing"
 
 	echo "${0##*/} $ARGS" >> /tmp/clang_log.txt
 	eval exec $EXE $ARGS

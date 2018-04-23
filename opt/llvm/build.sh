@@ -30,7 +30,12 @@ fi
 update_git() {
 	TARGET_DIR="$LLVM_ROOT/$1"
 	mkdir -p $TARGET_DIR
-	svn co $2 $TARGET_DIR
+	until svn co $2 $TARGET_DIR; do
+		sleep 1
+		cd $TARGET_DIR
+		svn cleanup
+		cd -
+	done
 }
 
 if [ "$UPDATE_GIT" = "1" ]; then
