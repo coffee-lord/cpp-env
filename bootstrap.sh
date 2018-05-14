@@ -6,7 +6,7 @@ python3 -m pip install --user --upgrade conan pip meson
 CLANG_VERSION=$($LLVM_SDK_ROOT/stage/bin/clang -v 2>&1 | sed -n 's/.*clang version \(.\..\).*/\1/p')
 
 export CONAN_USER_HOME=$(pwd)
-mkdir -p $CONAN_USER_HOME/.conan
+mkdir -p $CONAN_USER_HOME/.conan/profiles
 
 conan remote list > /dev/null
 
@@ -71,7 +71,30 @@ build_type: [None, Debug, Release]
 cppstd: [None, 98, gnu98, 11, gnu11, 14, gnu14, 17, gnu17]
 EOF
 
+cat > $CONAN_USER_HOME/.conan/profiles/default <<EOF
+[build_requires]
+[settings]
+arch=x86_64
+build_type=Release
+compiler=clang
+compiler.libcxx=libc++
+compiler.version=$CLANG_VERSION
+os=Linux
+arch_build=x86_64
+os_build=Linux
+[options]
+[env]
+EOF
+
+login_conan() {
+	conan user -p $CONAN_TOKEN -r signal9 $CONAN_USER
+}
+
+upload_package() {
+	conan upload -r signal9 --all -c --retry 5 "$1" || true
+}
+
 patch_pcs() {
-	sed -i -e 's/\([^a-zA-Z]-\)I/\1isystem/g' -e 's/-L${libdir}/& -Wl,--rpath=${libdir}/g' -e 's@\${prefix}//@/@g' **.pc
+	sed -i -e 's/\([^a-zA-Z]-\)I/\1isystem/g' **.pc
 	export PKG_CONFIG_PATH=$(pwd)
 }

@@ -1,8 +1,15 @@
 EXE=$LLVM_SDK_ROOT/stage/bin/${0##*/}
 ARGS=""
 for ARG in "$@"; do
+	ARG=${ARG//\"/\\\"}
 	ARGS="$ARGS \"$ARG\""
 done
+
+escape() {
+	for a in $1; do
+		echo -n \""$a"\"' '
+	done
+}
 
 COMMON_CFLAGS="\
 -pipe \
@@ -10,17 +17,19 @@ COMMON_CFLAGS="\
 -fPIC \
 -fdata-sections -ffunction-sections \
 -stdlib=libc++"
+COMMON_CFLAGS=$(escape "$COMMON_CFLAGS")
 
 COMMON_LDFLAGS="\
 -L$LLVM_SDK_ROOT/stage/lib \
 -Wl,-rpath=$LLVM_SDK_ROOT/stage/lib \
--Wl,-rpath='\$ORIGIN' \
+-Wl,-rpath='\\\$ORIGIN' \
 -rtlib=compiler-rt \
 -ldl \
 -lc++ \
 -lc++abi \
 -lunwind \
 -Wl,--threads,--gc-sections,--as-needed,-z,norelro"
+COMMON_LDFLAGS=$(escape "$COMMON_LDFLAGS")
 
 strip() {
 	ARGS=$(echo -n "$ARGS" | sed -r "s/(^|\")$*(\$|\")/ /g")
@@ -39,10 +48,12 @@ check_args() {
 }
 
 add_flags() {
+	CFLAGS=$(escape "$CFLAGS")
 	ARGS="$ARGS $COMMON_CFLAGS $CFLAGS"
 	check_args '-c' && return 0
 	check_args '-E' && return 0
 	check_args '-x c\+\+-header' && return 0
+	LDFLAGS=$(escape "$LDFLAGS")
 	ARGS="$ARGS $COMMON_LDFLAGS $LDFLAGS"
 }
 
@@ -79,13 +90,11 @@ run_exe() {
 
 	ARGS=$(echo -n "$ARGS" | sed 's/ "[^" ]*$ORIGIN[^" ]*" / /g')
 
+	ARGS=$(echo -n "$ARGS" | sed 's/" " *" "/" "/g')
+
 	strip_whitespace
 	add_flags
 
-	ARGS=$(echo -n "$ARGS" | sed 's/"-fmodules"/"--ccache-skip" &/g')
-	ARGS=$(echo -n "$ARGS" | sed 's/" *" //g')
-	# ARGS="$ARGS -Wno-narrowing"
-
-	echo "${0##*/} $ARGS" >> /tmp/clang_log.txt
+	echo "${0##*/} $ARGS" >> /tmp/clang.log
 	eval exec $EXE $ARGS
 }
