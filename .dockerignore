@@ -1,2 +1,4 @@
 .git
-update.sh
+Makefile
+.gitlab-ci.yml
+README.md

@@ -1,84 +1,32 @@
-#!/bin/sh -xue
+#!/bin/bash -xue
 
-UPDATE_GIT=1
-IS_REBUILD=1
+BUILD_DIR="/var/tmp/llvm"
+SRC_DIR="/root/llvm"
 
-LLVM_ROOT=$(pwd)
-export PATH="$LLVM_ROOT/stage/bin:/usr/bin:/bin"
+mkdir -p $SRC_DIR
+cd $SRC_DIR
 
-BUILD_DIR="/tmp/llvm"
+git clone --depth 1 https://github.com/llvm/llvm-project.git .
 
-if [ "$IS_REBUILD" = 1 ]; then
-	export CC=$LLVM_ROOT/stage/bin/clang
-	export CXX=$LLVM_ROOT/stage/bin/clang++
-	export AR=$LLVM_ROOT/stage/bin/llvm-ar
-	export NM=$LLVM_ROOT/stage/bin/llvm-nm
-	export RANLIB=$LLVM_ROOT/stage/bin/llvm-ranlib
-else
-	# export CC=clang
-	# export CXX=clang++
-	export CC=gcc
-	export CXX=g++
-fi
+mkdir -p $BUILD_DIR
 
-
-if ! [ "$LLVM_ROOT" = "/opt/llvm" ]; then
-	echo 'Refusing to run outside of /opt/llvm'
-	exit 0
-fi
-
-update_git() {
-	TARGET_DIR="$LLVM_ROOT/$1"
-	mkdir -p $TARGET_DIR
-	until svn co $2 $TARGET_DIR; do
-		sleep 1
-		cd $TARGET_DIR
-		svn cleanup
-		cd -
-	done
-}
-
-if [ "$UPDATE_GIT" = "1" ]; then
-	update_git src 'http://llvm.org/svn/llvm-project/llvm/trunk'
-	update_git src/tools/polly 'http://llvm.org/svn/llvm-project/polly/trunk'
-	update_git src/tools/clang 'http://llvm.org/svn/llvm-project/cfe/trunk'
-	update_git src/tools/clang/tools/extra 'http://llvm.org/svn/llvm-project/clang-tools-extra/trunk'
-	update_git src/tools/lldb 'http://llvm.org/svn/llvm-project/lldb/trunk'
-	update_git src/tools/lld 'http://llvm.org/svn/llvm-project/lld/trunk'
-	update_git src/projects/libcxx 'http://llvm.org/svn/llvm-project/libcxx/trunk'
-	update_git src/projects/libcxxabi 'http://llvm.org/svn/llvm-project/libcxxabi/trunk'
-	update_git src/projects/compiler-rt 'http://llvm.org/svn/llvm-project/compiler-rt/trunk'
-	update_git src/projects/openmp 'http://llvm.org/svn/llvm-project/openmp/trunk'
-	update_git src/projects/libunwind 'http://llvm.org/svn/llvm-project/libunwind/trunk'
-fi
-
-rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR" stage
-
-cd "$BUILD_DIR"
+cd $BUILD_DIR
 
 CFLAGS="\
 -pipe \
 -fomit-frame-pointer \
 -fno-stack-protector \
+-march=x86-64 -mtune=intel \
 -fdata-sections -ffunction-sections \
--fPIC"
+-fPIC \
+-O3"
+CXXFLAGS="$CFLAGS"
 LDFLAGS="\
 -pipe \
 -fPIC \
--Wl,-s,--gc-sections,--as-needed,-z,norelro \
--L$LLVM_ROOT/stage/lib \
--Wl,-rpath=$LLVM_ROOT/stage/lib \
--Wl,-rpath='\\\$ORIGIN' \
-"
+-Wl,-s,--gc-sections,--as-needed,-z,norelro"
 
-if [ "$IS_REBUILD" = 1 ]; then
-	CFLAGS="$CFLAGS -Oz"
-else
-	CFLAGS="$CFLAGS -Ofast"
-fi
-
-cat >/tmp/file.txt <<EOF
+CMAKE_ARGS=$(cat <<EOF
 
 # Enable Exception handling
 
@@ -92,7 +40,7 @@ CLANG_DEFAULT_CXX_STDLIB=libc++
 CLANG_DEFAULT_RTLIB=compiler-rt
 
 # Default linker to use (linker name or absolute path, empty for platform default)
-CLANG_DEFAULT_LINKER="$LLVM_ROOT/stage/bin/ld.lld"
+CLANG_DEFAULT_LINKER="/usr/local/bin/ld.lld"
 
 # Generate build targets for the Clang docs.
 CLANG_INCLUDE_DOCS=OFF
@@ -104,7 +52,7 @@ CLANG_INCLUDE_TESTS=OFF
 CLANG_TOOLS_EXTRA_INCLUDE_DOCS=OFF
 
 # Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.
-CMAKE_BUILD_TYPE=MinSizeRel
+CMAKE_BUILD_TYPE=Release
 
 # Flags used by the compiler during all build types.
 CMAKE_CXX_FLAGS="$CFLAGS"
@@ -114,9 +62,6 @@ CMAKE_C_FLAGS="$CFLAGS"
 
 # Flags used by the linker.
 CMAKE_EXE_LINKER_FLAGS="$LDFLAGS"
-
-# Install path prefix, prepended onto install directories.
-CMAKE_INSTALL_PREFIX="$LLVM_ROOT/stage"
 
 # Flags used by the linker during the creation of dll's.
 CMAKE_SHARED_LINKER_FLAGS='$LDFLAGS'
@@ -136,7 +81,9 @@ LIBCXX_INCLUDE_TESTS=OFF
 # Disables the Python scripting integration.
 LLDB_DISABLE_PYTHON=ON
 
-OPENMP_ENABLE_LIBOMPTARGET=OFF
+CMAKE_C_COMPILER_TARGET=x86_64-unknown-linux-gnu
+# Build builtins only for the default target
+COMPILER_RT_DEFAULT_TARGET_ONLY=ON
 
 # Generate build targets for llvm documentation.
 LLVM_INCLUDE_DOCS=OFF
@@ -170,8 +117,6 @@ LLVM_ENABLE_PIC=ON
 # Build OCaml bindings documentation.
 LLVM_ENABLE_OCAMLDOC=OFF
 
-LIBOMP_LIBFLAGS=-lm
-
 LLVM_LINK_LLVM_DYLIB=ON
 
 # Build and use the LLVM unwinder.
@@ -180,7 +125,6 @@ LIBCXXABI_USE_LLVM_UNWINDER=ON
 CLANG_TOOL_ARCMT_TEST_BUILD=OFF
 CLANG_TOOL_CLANG_DIFF_BUILD=OFF
 CLANG_TOOL_CLANG_FORMAT_VS_BUILD=OFF
-CLANG_TOOL_CLANG_FUNC_MAPPING_BUILD=OFF
 CLANG_TOOL_CLANG_FUZZER_BUILD=OFF
 CLANG_TOOL_CLANG_IMPORT_TEST_BUILD=OFF
 CLANG_TOOL_CLANG_OFFLOAD_BUNDLER_BUILD=OFF
@@ -189,22 +133,36 @@ CLANG_TOOL_C_INDEX_TEST_BUILD=OFF
 CLANG_TOOL_DIAGTOOL_BUILD=OFF
 CLANG_TOOL_CLANG_REFACTOR_BUILD=OFF
 CLANG_TOOL_CLANG_RENAME_BUILD=OFF
-CLANG_TOOL_EXTRA_BUILD=OFF
 COMPILER_RT_BUILD_LIBFUZZER=OFF
 LLVM_TOOL_LLVM_AS_FUZZER_BUILD=OFF
 LLVM_TOOL_LLVM_C_TEST_BUILD=OFF
-LLVM_TOOL_LLVM_DEMANGLE_FUZZER_BUILD=OFF
 LLVM_TOOL_LLVM_ISEL_FUZZER_BUILD=OFF
 LLVM_TOOL_LLVM_MC_ASSEMBLE_FUZZER_BUILD=OFF
 LLVM_TOOL_LLVM_MC_DISASSEMBLE_FUZZER_BUILD=OFF
 LLVM_TOOL_LLVM_OPT_FUZZER_BUILD=OFF
 LLVM_TOOL_LLVM_SPECIAL_CASE_LIST_FUZZER_BUILD=OFF
+
+LLVM_ENABLE_PROJECTS="clang;clang-tools-extra;libcxx;libcxxabi;libunwind;lldb;compiler-rt;lld;polly"
 EOF
+)
 
-CMAKE_ARGS=$(cat /tmp/file.txt | sed '/^#/d' | sed '/^$/d' | sed 's/.*/-D&/' | tr '\n' ' ')
+CMAKE_ARGS=$(echo -n "$CMAKE_ARGS" | sed -e '/^#/d' -e '/^$/d' -e 's/.*/-D&/' | tr '\n' ' ')
 
-if [ "$IS_REBUILD" = 1 ]; then
-	cat >/tmp/file.txt <<EOF
+eval "cmake -G Ninja $CMAKE_ARGS $SRC_DIR/llvm"
+ninja install
+
+cd $SRC_DIR
+rm -rf $BUILD_DIR
+mkdir -p $BUILD_DIR
+cd $BUILD_DIR
+
+export CC=clang
+export CXX=clang++
+export AR=llvm-ar
+export NM=llvm-nm
+export RANLIB=llvm-ranlib
+
+CMAKE_ARGS_STAGE_2=$(cat <<EOF
 
 # Use libc++ if available.
 LLVM_ENABLE_LIBCXX=ON
@@ -222,18 +180,21 @@ LIBCXXABI_USE_COMPILER_RT=ON
 LIBUNWIND_USE_COMPILER_RT=ON
 
 # Build LLVM with LTO. May be specified as Thin or Full to use a particular kind of LTO
-# LLVM_ENABLE_LTO=Thin
+LLVM_ENABLE_LTO=Thin
 
 CMAKE_AR=$AR
 CMAKE_RANLIB=$RANLIB
 CMAKE_NM=$NM
 EOF
+)
 
-	CMAKE_ARGS_STAGE_2=$(cat /tmp/file.txt | sed '/^#/d' | sed '/^$/d' | sed 's/.*/-D&/' | tr '\n' ' ')
-	CMAKE_ARGS="$CMAKE_ARGS $CMAKE_ARGS_STAGE_2"
-fi
+CMAKE_ARGS_STAGE_2=$(echo -n "$CMAKE_ARGS_STAGE_2" | sed -e '/^#/d' -e '/^$/d' -e 's/.*/-D&/' | tr '\n' ' ')
+CMAKE_ARGS="$CMAKE_ARGS $CMAKE_ARGS_STAGE_2"
 
-rm /tmp/file.txt
+eval "cmake -G Ninja $CMAKE_ARGS $SRC_DIR/llvm"
+ninja install
 
-eval "cmake -G Ninja $CMAKE_ARGS $LLVM_ROOT/src"
+cd ~
+rm -rf $BUILD_DIR $SRC_DIR
 
+ln -sf /usr/local/bin/ld.lld /usr/bin/ld

@@ -1,21 +1,22 @@
 FROM debian:sid-slim
 
-ENV LLVM_SDK_ROOT=/opt/llvm CONAN_CMAKE_GENERATOR=Ninja
+WORKDIR /root
 
-ADD ci-update-part-1.sh /root
-RUN /root/ci-update-part-1.sh && rm /root/ci-update-part-1.sh
+COPY scripts/1-install-base.sh scripts/
+RUN scripts/1-install-base.sh
 
-ADD opt /opt
+COPY scripts/2-build-clang.sh scripts/
+RUN scripts/2-build-clang.sh
 
-ADD ci-update-part-2.sh /root
-RUN /root/ci-update-part-2.sh && rm /root/ci-update-part-2.sh
-ADD ci-update-part-3.sh /root
-RUN /root/ci-update-part-3.sh && rm /root/ci-update-part-3.sh
-ADD ci-update-part-4.sh /root
-RUN /root/ci-update-part-4.sh && rm /root/ci-update-part-4.sh
-ADD ci-update-part-5.sh /root
-RUN /root/ci-update-part-5.sh && rm /root/ci-update-part-5.sh
+ENV CONAN_USER_HOME=/root \
+	CC=clang \
+	CXX=clang++ \
+	AR=llvm-ar \
+	NM=llvm-nm \
+	RANLIB=llvm-ranlib
 
-ADD bootstrap.sh /
+COPY scripts/3-cleanup.sh scripts/
+RUN scripts/3-cleanup.sh
 
-ENV PATH=/root/.local/bin:/opt/llvm/bin-release:/opt/llvm/stage/bin:/usr/local/sbin:/usr/sbin:/sbin:/usr/bin:/bin CC=/opt/llvm/bin-release/clang CXX=/opt/llvm/bin-release/clang++ AR=/opt/llvm/stage/bin/llvm-ar NM=/opt/llvm/stage/bin/llvm-nm RANLIB=/opt/llvm/stage/bin/llvm-ranlib CONAN_ENV_COMPILER_LIBCXX=libc++
+COPY scripts/4-setup-conan.sh scripts/
+RUN scripts/4-setup-conan.sh
