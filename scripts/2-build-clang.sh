@@ -182,6 +182,8 @@ LLVM_ENABLE_LLD=ON
 # Use compiler-rt instead of libgcc
 LIBCXX_USE_COMPILER_RT=ON
 
+LIBOMP_LIBFLAGS=-lm
+
 # Use compiler-rt instead of libgcc
 LIBCXXABI_USE_COMPILER_RT=ON
 
