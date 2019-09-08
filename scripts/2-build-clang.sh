@@ -3,10 +3,16 @@
 BUILD_DIR="/var/tmp/llvm"
 SRC_DIR="/root/llvm"
 
-mkdir -p $SRC_DIR
-cd $SRC_DIR
+download_src() {
+	SRC_TAR=/tmp/src.tar.gz
+	curl -L --compressed "https://github.com/llvm/llvm-project/archive/llvmorg-$1.tar.gz" > $SRC_TAR
+	cd /root
+	tar -xf $SRC_TAR
+	rm $SRC_TAR
+	mv llvm-project-llvmorg-$1 llvm
+}
 
-git clone --depth 1 https://github.com/llvm/llvm-project.git .
+download_src 8.0.1
 
 mkdir -p $BUILD_DIR
 
@@ -23,6 +29,9 @@ CFLAGS="\
 CXXFLAGS="$CFLAGS"
 LDFLAGS="\
 -pipe \
+-L/usr/local/lib \
+-Wl,-rpath=/usr/local/lib \
+-Wl,-rpath='\\\$ORIGIN' \
 -fPIC \
 -Wl,-s,--gc-sections,--as-needed,-z,norelro"
 
@@ -156,11 +165,11 @@ rm -rf $BUILD_DIR
 mkdir -p $BUILD_DIR
 cd $BUILD_DIR
 
-export CC=clang
-export CXX=clang++
-export AR=llvm-ar
-export NM=llvm-nm
-export RANLIB=llvm-ranlib
+export CC=/usr/local/bin/clang
+export CXX=/usr/local/bin/clang++
+export AR=/usr/local/bin/llvm-ar
+export NM=/usr/local/bin/llvm-nm
+export RANLIB=/usr/local/bin/llvm-ranlib
 
 CMAKE_ARGS_STAGE_2=$(cat <<EOF
 
@@ -198,3 +207,20 @@ cd ~
 rm -rf $BUILD_DIR $SRC_DIR
 
 ln -sf /usr/local/bin/ld.lld /usr/bin/ld
+
+mkdir -p /opt/bin
+cd /opt/bin
+
+make_clang_exe() {
+	cat > $1 <<EOF
+#!/bin/bash
+
+ARGS="-L/usr/local/lib -Wl,-rpath=/usr/local/lib"
+for i do [[ \$i == "-c" || \$i == "-E" ]] && ARGS= && break ; done
+exec /usr/local/bin/$1 \$ARGS \$*
+EOF
+	chmod +x $1
+}
+
+make_clang_exe clang
+make_clang_exe clang++
