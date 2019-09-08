@@ -12,3 +12,7 @@ docker:
 squash: docker
 	@docker-squash -t $(IMAGE):squashed \
 		$(IMAGE):latest
+
+.PHONY: push
+push: squash
+	@docker push $(IMAGE):squashed

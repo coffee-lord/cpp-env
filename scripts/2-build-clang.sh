@@ -151,7 +151,7 @@ LLVM_TOOL_LLVM_MC_DISASSEMBLE_FUZZER_BUILD=OFF
 LLVM_TOOL_LLVM_OPT_FUZZER_BUILD=OFF
 LLVM_TOOL_LLVM_SPECIAL_CASE_LIST_FUZZER_BUILD=OFF
 
-LLVM_ENABLE_PROJECTS="clang;clang-tools-extra;libcxx;libcxxabi;libunwind;lldb;compiler-rt;lld;polly"
+LLVM_ENABLE_PROJECTS="clang;clang-tools-extra;libcxx;libcxxabi;libunwind;lldb;compiler-rt;lld;polly;openmp"
 EOF
 )
 
@@ -224,3 +224,5 @@ EOF
 
 make_clang_exe clang
 make_clang_exe clang++
+
+find /usr/local/lib -name '*.a' ! -name '*clang_rt*' -delete
