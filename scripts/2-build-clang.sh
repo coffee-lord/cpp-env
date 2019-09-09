@@ -226,4 +226,4 @@ EOF
 make_clang_exe clang
 make_clang_exe clang++
 
-find /usr/local/lib -name '*.a' ! -name '*clang_rt*' ! -name 'libc++*' -delete
+find /usr/local/lib -name '*.a' ! -name '*clang_rt*' ! -name 'libc++*' ! -name 'libunwind*' -delete
