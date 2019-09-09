@@ -170,6 +170,7 @@ export CC=/usr/local/bin/clang
 export CXX=/usr/local/bin/clang++
 export AR=/usr/local/bin/llvm-ar
 export NM=/usr/local/bin/llvm-nm
+export STRIP=/usr/local/bin/llvm-strip
 export RANLIB=/usr/local/bin/llvm-ranlib
 
 CMAKE_ARGS_STAGE_2=$(cat <<EOF

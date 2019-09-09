@@ -13,6 +13,7 @@ ENV CONAN_USER_HOME=/root \
 	CXX=clang++ \
 	AR=llvm-ar \
 	NM=llvm-nm \
+	STRIP=llvm-strip \
 	RANLIB=llvm-ranlib \
 	PATH=/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
