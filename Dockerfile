@@ -9,8 +9,8 @@ COPY scripts/2-build-clang.sh scripts/
 RUN scripts/2-build-clang.sh
 
 ENV CONAN_USER_HOME=/root \
-	CC=clang \
-	CXX=clang++ \
+	CC="ccache clang" \
+	CXX="ccache clang++" \
 	AR=llvm-ar \
 	NM=llvm-nm \
 	STRIP=llvm-strip \

@@ -15,6 +15,7 @@ apt-get install -y --no-install-recommends \
 	git \
 	libedit-dev \
 	curl \
+	gcovr \
 	libpthread-stubs0-dev \
 	libncurses5-dev \
 	libxml2-dev \
