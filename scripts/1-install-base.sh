@@ -3,7 +3,7 @@
 apt-get update
 apt-get dist-upgrade -y
 apt-get install -y --no-install-recommends \
-	python3.7 \
+	python3 \
 	python3-pip \
 	patchelf \
 	build-essential \
