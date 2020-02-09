@@ -12,7 +12,7 @@ download_src() {
 	mv llvm-project-llvmorg-$1 llvm
 }
 
-download_src 9.0.1
+download_src 10.0.0-rc1
 
 mkdir -p $BUILD_DIR
 
