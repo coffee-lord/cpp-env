@@ -4,14 +4,12 @@ IMAGE := registry.gitlab.com/signal9/cpp-env
 
 .PHONY: docker
 docker:
-	@docker pull $(IMAGE):latest; \
-    docker build --pull -t $(IMAGE) \
-        --cache-from $(IMAGE):latest .
+	@docker pull $(IMAGE):latest || true
+	@docker build --pull -t $(IMAGE) --cache-from $(IMAGE):latest .
 
 .PHONY: squash
 squash: docker
-	@docker-squash -t $(IMAGE):squashed \
-		$(IMAGE):latest
+	@docker-squash -t $(IMAGE):squashed $(IMAGE):latest
 
 .PHONY: push
 push: squash
