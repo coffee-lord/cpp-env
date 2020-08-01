@@ -22,3 +22,7 @@ RUN scripts/3-cleanup.sh
 
 COPY scripts/4-setup-conan.sh scripts/
 RUN scripts/4-setup-conan.sh
+
+COPY scripts/entrypoint.sh /
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"]

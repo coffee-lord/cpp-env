@@ -2,7 +2,7 @@
 
 BUILD_DIR="/var/tmp/llvm"
 SRC_DIR="/root/llvm"
-LLVM_VERSION="10.0.0"
+LLVM_VERSION="10.0.1"
 LLVM_ROOT="/usr/local"
 
 SRC_TAR=/tmp/src.tar.gz
@@ -92,15 +92,16 @@ cd $BUILD_DIR
 
 export CFLAGS="$CFLAGS -Oz"
 export CXXFLAGS="$CXXFLAGS -Oz"
-export LDFLAGS="$LDFLAGS -Oz"
+export LDFLAGS="$LDFLAGS -lm -Oz"
 export CXX="$LLVM_ROOT/bin/clang++"
 export CC="$LLVM_ROOT/bin/clang"
 
 eval "cmake -G Ninja \
- -DLLVM_ENABLE_PROJECTS='clang;clang-tools-extra;libcxx;libcxxabi;libunwind;lldb;compiler-rt;lld;polly' \
+ -DLLVM_ENABLE_PROJECTS='clang;clang-tools-extra;libcxx;libcxxabi;libunwind;lldb;compiler-rt;lld;polly;openmp' \
  -DLIBUNWIND_USE_COMPILER_RT=ON \
  -DLIBCXXABI_USE_COMPILER_RT=ON \
  -DLIBCXX_USE_COMPILER_RT=ON \
+ -DOPENMP_ENABLE_LIBOMPTARGET=OFF \
  -DLLVM_ENABLE_LIBCXX=ON \
  -DLLVM_ENABLE_LLD=ON \
  $CMAKE_ARGS \
